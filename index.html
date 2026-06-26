@@ -240,8 +240,17 @@ header {
 .expense-cat {
   font-size: 10px; color: var(--muted);
   background: rgba(191,88,53,0.1); border-radius: 8px;
-  padding: 3px 8px; letter-spacing: 0.5px;
+  padding: 3px 8px; letter-spacing: 0.5px; outline: none;
 }
+.owed-item { display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:12px; background:var(--cream2); margin-bottom:6px; }
+.owed-item.settled { opacity:.45; }
+.owed-item.settled .owed-desc { text-decoration:line-through; }
+.owed-who { font-size:10px; background:rgba(26,87,154,0.1); color:var(--sea); border-radius:8px; padding:3px 8px; letter-spacing:.4px; white-space:nowrap; flex-shrink:0; outline:none; }
+.owed-desc { flex:1; font-size:13px; color:var(--olive); outline:none; }
+.owed-amt { font-size:13px; font-weight:600; color:var(--sea); min-width:50px; text-align:right; outline:none; }
+.settle-btn { font-size:10px; padding:3px 10px; border-radius:8px; border:1px solid var(--sea); background:none; color:var(--sea); cursor:pointer; white-space:nowrap; transition:all .15s; }
+.settle-btn:hover { background:var(--sea); color:#fff; }
+.owed-item.settled .settle-btn { background:var(--sea); color:#fff; }
 .expense-amt {
   font-size: 13px; font-weight: 600; color: var(--terra);
   min-width: 50px; text-align: right; outline: none;
@@ -732,23 +741,29 @@ header {
       <div class="pie-wrap">
         <svg width="140" height="140" viewBox="0 0 140 140" id="bud-pie">
           <circle cx="70" cy="70" r="52" fill="none" stroke="var(--cream2)" stroke-width="22"/>
-          <circle cx="70" cy="70" r="52" fill="none" stroke="#bf5835" stroke-width="22" stroke-dasharray="115 327" stroke-dashoffset="0" transform="rotate(-90 70 70)"/>
-          <circle cx="70" cy="70" r="52" fill="none" stroke="#c8940a" stroke-width="22" stroke-dasharray="65 327" stroke-dashoffset="-115" transform="rotate(-90 70 70)"/>
-          <circle cx="70" cy="70" r="52" fill="none" stroke="#1a579a" stroke-width="22" stroke-dasharray="49 327" stroke-dashoffset="-180" transform="rotate(-90 70 70)"/>
-          <circle cx="70" cy="70" r="52" fill="none" stroke="#c04070" stroke-width="22" stroke-dasharray="33 327" stroke-dashoffset="-229" transform="rotate(-90 70 70)"/>
-          <circle cx="70" cy="70" r="52" fill="none" stroke="#6a8040" stroke-width="22" stroke-dasharray="65 327" stroke-dashoffset="-262" transform="rotate(-90 70 70)"/>
+          <!-- dynamic slices injected by JS -->
           <circle cx="70" cy="70" r="39" fill="var(--card)"/>
-          <text x="70" y="67" text-anchor="middle" fill="var(--terra)" font-size="12" font-family="Playfair Display,serif" font-style="italic" contenteditable="true" data-key="pie_label">£2,000</text>
-          <text x="70" y="79" text-anchor="middle" fill="var(--muted)" font-size="6" letter-spacing="1.5">MONTHLY</text>
+          <text id="pie-center-val" x="70" y="67" text-anchor="middle" fill="var(--terra)" font-size="12" font-family="Playfair Display,serif" font-style="italic">£0</text>
+          <text x="70" y="79" text-anchor="middle" fill="var(--muted)" font-size="6" letter-spacing="1.5">SPENT</text>
         </svg>
-        <div class="pie-leg">
-          <div class="pie-li"><div class="pie-dot" style="background:#bf5835"></div>Dates &amp; Dining — 35%</div>
-          <div class="pie-li"><div class="pie-dot" style="background:#c8940a"></div>Travel &amp; Trips — 20%</div>
-          <div class="pie-li"><div class="pie-dot" style="background:#1a579a"></div>Activities — 15%</div>
-          <div class="pie-li"><div class="pie-dot" style="background:#c04070"></div>Gifts — 10%</div>
-          <div class="pie-li"><div class="pie-dot" style="background:#6a8040"></div>Other — 20%</div>
-        </div>
+        <div class="pie-leg" id="pie-legend"></div>
       </div>
+    </div>
+  </div>
+
+  <!-- EXPENSES OWED -->
+  <div class="sec-label" style="margin-top:4px">Expenses Owed</div>
+  <div class="card" style="margin-bottom:20px">
+    <div class="card-t" contenteditable="true" data-key="card_owed_title" spellcheck="false">Expenses Owed</div>
+    <div id="owed-list"></div>
+    <div class="add-row" style="flex-wrap:wrap">
+      <select class="add-inp" id="owed-who" style="flex:1;min-width:160px">
+        <option value="Bella owes Yaya">Bella owes Yaya</option>
+        <option value="Yaya owes Bella">Yaya owes Bella</option>
+      </select>
+      <input class="add-inp" id="owed-desc" placeholder="For what…" style="flex:2" onkeydown="if(event.key==='Enter')addOwed()"/>
+      <input class="add-inp" id="owed-amt" type="number" placeholder="£0" style="width:70px" onkeydown="if(event.key==='Enter')addOwed()"/>
+      <button class="add-btn" onclick="addOwed()">+ Add</button>
     </div>
   </div>
 
@@ -1029,14 +1044,14 @@ const EXP_KEY = 'rel_expenses';
 function addExpense(name, cat, amt) {
   const n = name || $('exp-name')?.value?.trim();
   const c = cat || $('exp-cat')?.value?.trim() || 'Other';
-  const a = amt || parseFloat($('exp-amt')?.value) || 0;
+  const a = parseFloat(String(amt ?? $('exp-amt')?.value ?? 0)) || 0;
   if (!n) return;
   if (!name) { $('exp-name').value=''; $('exp-cat').value=''; $('exp-amt').value=''; }
   const item = document.createElement('div');
   item.className = 'expense-item';
   item.innerHTML = `
     <div class="expense-name" contenteditable="true" spellcheck="false">${n}</div>
-    <div class="expense-cat">${c}</div>
+    <div class="expense-cat" contenteditable="true" spellcheck="false">${c}</div>
     <div class="expense-amt" contenteditable="true" spellcheck="false">£${a}</div>
     <button class="del-btn" style="opacity:0.4" onclick="this.closest('.expense-item').remove();saveExpenses()">×</button>
   `;
@@ -1047,8 +1062,8 @@ function addExpense(name, cat, amt) {
 function saveExpenses() {
   const items = [...document.querySelectorAll('#expenses-list .expense-item')].map(el => ({
     name: el.querySelector('.expense-name').textContent,
-    cat: el.querySelector('.expense-cat').textContent,
-    amt: el.querySelector('.expense-amt').textContent
+    cat:  el.querySelector('.expense-cat').textContent,
+    amt:  el.querySelector('.expense-amt').textContent
   }));
   save(EXP_KEY, items);
   updateBudgetTotals();
@@ -1060,18 +1075,101 @@ function loadExpenses() {
     { name: 'Flowers', cat: 'Gifts', amt: '£35' }
   ]).forEach(e => addExpense(e.name, e.cat, e.amt.replace('£','')));
 }
+
+const PIE_COLORS = ['#bf5835','#c8940a','#1a579a','#c04070','#6a8040','#7a5c8a','#2a8070'];
+
 function updateBudgetTotals() {
-  let total = 0;
-  document.querySelectorAll('.expense-amt').forEach(el => {
-    const n = parseFloat(el.textContent.replace(/[^0-9.]/g,''));
-    if (!isNaN(n)) total += n;
-  });
+  const rows = [...document.querySelectorAll('#expenses-list .expense-item')].map(el => ({
+    cat: el.querySelector('.expense-cat').textContent.trim() || 'Other',
+    amt: parseFloat(el.querySelector('.expense-amt').textContent.replace(/[^0-9.]/g,'')) || 0
+  }));
+  const total = rows.reduce((s, e) => s + e.amt, 0);
   const budgetText = document.querySelector('[data-key="bud_total"]')?.textContent || '';
   const budget = parseFloat(budgetText.replace(/[^0-9.]/g,'')) || 2000;
   const remain = budget - total;
-  const spent = $('bud-spent'); const rem = $('bud-remain');
+  const spent = $('bud-spent'), rem = $('bud-remain');
   if (spent) spent.textContent = '£' + total.toFixed(0);
   if (rem) { rem.textContent = '£' + remain.toFixed(0); rem.style.color = remain < 0 ? 'var(--terra)' : 'var(--sea)'; }
+
+  // group by category for pie
+  const catMap = {};
+  rows.forEach(e => { catMap[e.cat] = (catMap[e.cat] || 0) + e.amt; });
+  updatePieChart(catMap, total);
+}
+
+function updatePieChart(catMap, total) {
+  const pie = $('bud-pie');
+  const leg = $('pie-legend');
+  if (!pie) return;
+  pie.querySelectorAll('.pie-slice').forEach(el => el.remove());
+  if (leg) leg.innerHTML = '';
+  const cv = $('pie-center-val');
+  if (cv) cv.textContent = '£' + (total || 0).toFixed(0);
+  if (!total) return;
+
+  const circ = 327; // 2π × 52
+  const innerCircle = pie.querySelector('circle[fill="var(--card)"]');
+  let offset = 0;
+  Object.entries(catMap).forEach(([cat, amt], i) => {
+    const pct = amt / total;
+    const dash = pct * circ;
+    const color = PIE_COLORS[i % PIE_COLORS.length];
+    const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    c.setAttribute('cx','70'); c.setAttribute('cy','70'); c.setAttribute('r','52');
+    c.setAttribute('fill','none'); c.setAttribute('stroke', color);
+    c.setAttribute('stroke-width','22');
+    c.setAttribute('stroke-dasharray', `${dash} ${circ}`);
+    c.setAttribute('stroke-dashoffset', String(-offset));
+    c.setAttribute('transform','rotate(-90 70 70)');
+    c.classList.add('pie-slice');
+    pie.insertBefore(c, innerCircle);
+    if (leg) {
+      const li = document.createElement('div');
+      li.className = 'pie-li';
+      li.innerHTML = `<div class="pie-dot" style="background:${color}"></div>${cat} — ${Math.round(pct*100)}%`;
+      leg.appendChild(li);
+    }
+    offset += dash;
+  });
+}
+
+// ── EXPENSES OWED ────────────────────────────────────────────
+const OWED_KEY = 'rel_owed';
+function addOwed(who, desc, amt, settled) {
+  const w = who || $('owed-who')?.value || 'Bella owes Yaya';
+  const d = desc || $('owed-desc')?.value?.trim();
+  const a = parseFloat(String(amt ?? $('owed-amt')?.value ?? 0)) || 0;
+  if (!d) return;
+  if (!who) { $('owed-desc').value=''; $('owed-amt').value=''; }
+  const item = document.createElement('div');
+  item.className = 'owed-item' + (settled ? ' settled' : '');
+  item.innerHTML = `
+    <div class="owed-who" contenteditable="true" spellcheck="false">${w}</div>
+    <div class="owed-desc" contenteditable="true" spellcheck="false">${d}</div>
+    <div class="owed-amt" contenteditable="true" spellcheck="false">£${a}</div>
+    <button class="settle-btn" onclick="toggleSettle(this)">${settled ? 'Settled ✓' : 'Settle'}</button>
+    <button class="del-btn" style="opacity:.4" onclick="this.closest('.owed-item').remove();saveOwed()">×</button>
+  `;
+  item.querySelectorAll('[contenteditable]').forEach(el => el.addEventListener('blur', saveOwed));
+  $('owed-list').appendChild(item);
+  saveOwed();
+}
+function toggleSettle(btn) {
+  const item = btn.closest('.owed-item');
+  item.classList.toggle('settled');
+  btn.textContent = item.classList.contains('settled') ? 'Settled ✓' : 'Settle';
+  saveOwed();
+}
+function saveOwed() {
+  save(OWED_KEY, [...document.querySelectorAll('#owed-list .owed-item')].map(el => ({
+    who: el.querySelector('.owed-who').textContent,
+    desc: el.querySelector('.owed-desc').textContent,
+    amt: el.querySelector('.owed-amt').textContent,
+    settled: el.classList.contains('settled')
+  })));
+}
+function loadOwed() {
+  load(OWED_KEY, []).forEach(o => addOwed(o.who, o.desc, o.amt.replace('£',''), o.settled));
 }
 
 // ── PLANS THIS WEEK ──────────────────────────────────────────
@@ -1383,6 +1481,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initCountdown();
   loadGoals();
   loadExpenses();
+  loadOwed();
   renderCal();
   loadPlans();
   loadDateIdeas();
