@@ -659,53 +659,6 @@ header {
     </div>
   </div>
 
-  <!-- ROW 1: Love Note + Anniversary -->
-  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-bottom:20px">
-
-    <!-- LOVE NOTE -->
-    <div class="card">
-      <div class="card-t" contenteditable="true" data-key="card_lovenote_title" spellcheck="false">Love Note</div>
-      <div class="love-note-body" contenteditable="true" data-key="love_note" spellcheck="false">You make every ordinary day feel like Amalfi.</div>
-    </div>
-
-    <!-- ANNIVERSARY COUNTDOWN -->
-    <div class="card">
-      <div class="card-t" contenteditable="true" data-key="card_anniv_title" spellcheck="false">Anniversary Countdown</div>
-      <input type="date" id="anniv-date" class="anniversary-input" placeholder="Set your anniversary date"/>
-      <div class="countdown-grid">
-        <div class="countdown-unit"><div class="countdown-num" id="cd-days">—</div><div class="countdown-lbl">Days</div></div>
-        <div class="countdown-unit"><div class="countdown-num" id="cd-hours">—</div><div class="countdown-lbl">Hours</div></div>
-        <div class="countdown-unit"><div class="countdown-num" id="cd-mins">—</div><div class="countdown-lbl">Mins</div></div>
-        <div class="countdown-unit"><div class="countdown-num" id="cd-secs">—</div><div class="countdown-lbl">Secs</div></div>
-      </div>
-      <div id="anniv-label" style="font-size:11px;color:var(--muted);text-align:center;margin-top:10px;font-family:'Cormorant Garamond',serif;font-style:italic;"></div>
-    </div>
-
-    <!-- TODAY'S MOOD -->
-    <div class="card">
-      <div class="card-t" contenteditable="true" data-key="card_mood_title" spellcheck="false">Today's Vibe</div>
-      <div style="font-size:11px;color:var(--muted);margin-bottom:10px;font-family:'DM Sans',sans-serif;">How are you both feeling?</div>
-      <div style="margin-bottom:14px">
-        <div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--terra);margin-bottom:6px;font-family:'DM Sans',sans-serif;font-weight:600">Bella</div>
-        <div class="mood-row" id="mood-bella">
-          <button class="mood-btn" onclick="setMood('bella',this)">☀️ Sunny</button>
-          <button class="mood-btn" onclick="setMood('bella',this)">🌊 Flowing</button>
-          <button class="mood-btn" onclick="setMood('bella',this)">🍋 Zesty</button>
-          <button class="mood-btn" onclick="setMood('bella',this)">🌿 Calm</button>
-        </div>
-      </div>
-      <div>
-        <div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--sea);margin-bottom:6px;font-family:'DM Sans',sans-serif;font-weight:600">Yaya</div>
-        <div class="mood-row" id="mood-yaya">
-          <button class="mood-btn" onclick="setMood('yaya',this)">☀️ Sunny</button>
-          <button class="mood-btn" onclick="setMood('yaya',this)">🌊 Flowing</button>
-          <button class="mood-btn" onclick="setMood('yaya',this)">🍋 Zesty</button>
-          <button class="mood-btn" onclick="setMood('yaya',this)">🌿 Calm</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- ROW 2: Couple Goals + This Week mini -->
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px">
 
