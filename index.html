@@ -1096,11 +1096,12 @@ function addDateIdea(text, icon) {
   const item = document.createElement('div');
   item.className = 'bucket-item';
   item.innerHTML = `
-    <div class="bucket-icon">${ic}</div>
+    <div class="bucket-icon" contenteditable="true" spellcheck="false" title="Click to change emoji">${ic}</div>
     <div class="bucket-text" contenteditable="true" spellcheck="false">${t}</div>
     <button class="del-btn" style="opacity:0.4" onclick="this.closest('.bucket-item').remove();saveDateIdeas()">×</button>
   `;
   item.querySelector('.bucket-text').addEventListener('blur', saveDateIdeas);
+  item.querySelector('.bucket-icon').addEventListener('blur', saveDateIdeas);
   $('dateideas-list').appendChild(item);
   saveDateIdeas();
 }
@@ -1130,7 +1131,7 @@ function addBucket(text, icon, done) {
   const item = document.createElement('div');
   item.className = 'bucket-item';
   item.innerHTML = `
-    <div class="bucket-icon">${ic}</div>
+    <div class="bucket-icon" contenteditable="true" spellcheck="false" title="Click to change emoji">${ic}</div>
     <div class="bucket-text" contenteditable="true" spellcheck="false">${t}</div>
     <div class="bucket-check ${done?'done':''}" onclick="toggleBucket(this)">
       ${done ? '<svg width="8" height="7" viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1" stroke="white" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>' : ''}
@@ -1138,6 +1139,7 @@ function addBucket(text, icon, done) {
     <button class="del-btn" style="opacity:0.4" onclick="this.closest('.bucket-item').remove();saveBucket()">×</button>
   `;
   item.querySelector('.bucket-text').addEventListener('blur', saveBucket);
+  item.querySelector('.bucket-icon').addEventListener('blur', saveBucket);
   $('bucket-list').appendChild(item);
   saveBucket();
 }
